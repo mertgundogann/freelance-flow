@@ -3,23 +3,24 @@ import bcrypt from "bcrypt";
 import pool from "../db/db.js";
 import asyncHandler from "../utils/asyncHandler.js";
 export const register = asyncHandler(async (req, res) => {
-    const { username, email, password } = req.body;
-
     
-    if (!username || !email || !password) {
-        const error = new Error("Lütfen tüm alanları doldurunuz.");
+    const { email, password } = req.body;
+
+  
+    if (!email || !password) {
+        const error = new Error("Lütfen e-posta ve şifre alanlarını doldurunuz.");
         error.statusCode = 400;
         throw error;
     }
 
-   
+
     if (password.length < 6) {
         const error = new Error("Şifre en az 6 karakter olmalıdır.");
         error.statusCode = 400;
         throw error;
     }
 
-    
+
     const userCheck = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     if (userCheck.rows.length > 0) {
         const error = new Error("Bu email ile kayıtlı bir kullanıcı var.");
@@ -27,21 +28,23 @@ export const register = asyncHandler(async (req, res) => {
         throw error;
     }
 
+
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const query = "INSERT INTO users(username, email, password) VALUES($1, $2, $3) RETURNING id, username, email";
-    const values = [username, email, hashedPassword];
+
+    const query = "INSERT INTO users(email, password) VALUES($1, $2) RETURNING id, email";
+    const values = [email, hashedPassword];
     const result = await pool.query(query, values);
 
     res.status(201).json({
         success: true,
-        message: "Kullanıcı oluşturuldu.",
+        message: "Kullanıcı başarıyla oluşturuldu.",
         user: result.rows[0]
     });
 });
 
-import asyncHandler from "../utils/asyncHandler.js";
+
 
 export const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;

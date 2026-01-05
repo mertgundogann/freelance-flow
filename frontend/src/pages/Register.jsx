@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { Link } from 'react-router-dom';
 
-const Login = ({ onLogin }) => {
+const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await api.post('/auth/login', { email, password });
-            localStorage.setItem('token', response.data.token);
-            onLogin();
+            // Backend kayıt rotasına istek atıyoruz 📮
+            await api.post('/auth/register', { email, password });
+            alert("Kayıt başarılı! Giriş yapabilirsiniz.");
+            navigate('/login'); // Başarılı kayıt sonrası Login'e yönlendir
         } catch (error) {
-            alert("Giriş bilgileri hatalı!");
+            alert("Kayıt başarısız. Bu e-posta zaten kullanımda olabilir.");
         } finally {
             setLoading(false);
         }
@@ -25,9 +27,9 @@ const Login = ({ onLogin }) => {
         <div className="min-h-screen flex items-center justify-center bg-page-bg p-4">
             <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
                 <div className="text-center mb-8">
-                    <div className="text-4xl mb-3">🔐</div>
-                    <h1 className="text-3xl font-black text-gray-800">Tekrar Hoş Geldin</h1>
-                    <p className="text-gray-500 mt-2">Notlarına erişmek için giriş yap</p>
+                    <div className="text-4xl mb-3">✍️</div>
+                    <h1 className="text-3xl font-black text-gray-800">Yeni Hesap Aç</h1>
+                    <p className="text-gray-500 mt-2">Notlarını buluta taşımaya hazır mısın?</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -35,7 +37,6 @@ const Login = ({ onLogin }) => {
                         <label className="text-sm font-bold text-gray-700 ml-1">E-posta</label>
                         <input 
                             type="email" 
-                            placeholder="ornek@mail.com" 
                             value={email} 
                             onChange={(e) => setEmail(e.target.value)} 
                             required 
@@ -47,7 +48,6 @@ const Login = ({ onLogin }) => {
                         <label className="text-sm font-bold text-gray-700 ml-1">Şifre</label>
                         <input 
                             type="password" 
-                            placeholder="••••••••" 
                             value={password} 
                             onChange={(e) => setPassword(e.target.value)} 
                             required 
@@ -58,33 +58,23 @@ const Login = ({ onLogin }) => {
                     <button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-brand-blue hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-wait mt-2"
+                        className="w-full bg-brand-blue hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-70 mt-2"
                     >
-                        {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
+                        {loading ? 'Hesap Oluşturuluyor...' : 'Ücretsiz Kayıt Ol'}
                     </button>
                 </form>
 
-                {/* Kayıt Olma Yönlendirmesi */}
                 <div className="mt-6 text-center">
                     <p className="text-gray-600">
-                        Hesabın yok mu?{' '}
-                        <Link 
-                            to="/register" 
-                            className="text-brand-blue font-bold hover:underline transition-all"
-                        >
-                            Hemen Kayıt Ol ✍️
+                        Zaten bir hesabın var mı?{' '}
+                        <Link to="/login" className="text-brand-blue font-bold hover:underline">
+                            Giriş Yap
                         </Link>
                     </p>
                 </div>
-
-                <footer className="mt-8 text-center border-t border-gray-50 pt-6">
-                    <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">
-                        Güvenli Not Defteri Sistemi
-                    </p>
-                </footer>
             </div>
         </div>
     );
 };
 
-export default Login;
+export default Register;

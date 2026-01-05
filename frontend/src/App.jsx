@@ -1,30 +1,51 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import Notes from './pages/Notes.jsx'; 
-import Navbar from './components/NavBar';
-import PrivateRoute from './components/PrivateRoute'; // Import etmeyi unutma!
+import Register from './pages/Register';
+import Notes from './pages/Notes';
 
 function App() {
-  return (
-    <BrowserRouter>
-      {/* Navbar artık Router içinde, böylece useNavigate çalışabilir */}
-      <Navbar /> 
-      
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Login />} />
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
 
-        {/* Sadece Korumalı Rota kalsın */}
+ 
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+  };
+
+  return (
+    <Router>
+      <Routes>
+        {/* Ana sayfa yönlendirmesi */}
+        <Route 
+          path="/" 
+          element={isAuthenticated ? <Navigate to="/notes" /> : <Navigate to="/login" />} 
+        />
+        
+        {/* Login Sayfası */}
+        <Route 
+          path="/login" 
+          element={!isAuthenticated ? <Login onLogin={handleLoginSuccess} /> : <Navigate to="/notes" />} 
+        />
+        
+        {/* Register Sayfası */}
+        <Route 
+          path="/register" 
+          element={!isAuthenticated ? <Register /> : <Navigate to="/notes" />} 
+        />
+        
+        {/* Notlar Sayfası (Korumalı) */}
         <Route 
           path="/notes" 
-          element={
-            <PrivateRoute>
-              <Notes />
-            </PrivateRoute>
-          } 
+          element={isAuthenticated ? <Notes onLogout={handleLogout} /> : <Navigate to="/login" />} 
         />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
